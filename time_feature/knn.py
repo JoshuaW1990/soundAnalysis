@@ -1,13 +1,12 @@
 import numpy as np
-import xlrd
-from sklearn import svm
+from sklearn import neighbors
 from sklearn.cross_validation import train_test_split
-from sklearn.svm import LinearSVC
-from sklearn.feature_selection import SelectFromModel
-from math import ceil, floor
+import xlrd
+from math import floor, ceil, log, exp
+from collections import defaultdict
+import matplotlib.pyplot as plt
 
-"""read data
-"""
+
 xl_wb = xlrd.open_workbook("set01.xlsx")
 
 # Read the data
@@ -39,47 +38,45 @@ for instance in input_set:
 max_value = max(flatten_input)
 min_value = min(flatten_input)
 gap = max_value - min_value
-gap_fold_num = 20
+gap_fold_num = 10
 gap_fold_size = float(gap) / float(gap_fold_num)
 preprocess_input = []
 for instance in input_set:
     preprocess_instance = []
     for value in instance:
         tmp_value = value - min_value
-        value = float(floor(float(tmp_value) / gap_fold_size))
+        value = int(floor(float(tmp_value) / gap_fold_size))
         preprocess_instance.append(value)
     preprocess_input.append(preprocess_instance)
+
+
+
 
 
 # Split the data for cross validation
 X_train, X_test, Y_train, Y_test = train_test_split(preprocess_input, output_set,
                                                     test_size=0.1,
                                                     random_state=0)
-
-"""helper function
+"""KNN method
 """
-#accuracy
-def accurayc(pred_labels, labels):
-    correct = 0
-    total = len(labels)
-    for i in range(len(labels)):
-        pred = pred_labels[i]
-        label = labels[i]
-        if pred == label:
-            correct += 1
-    return float(correct) / float(total)
+n_neighbors = 50
+clf = neighbors.KNeighborsClassifier(10, weights='uniform')
+clf.fit(X_train, Y_train)
+
+Y_pred = clf.predict(X_test)
+correct = 0.0
+for i in range(len(Y_test)):
+    if Y_test[i] == Y_pred[i]:
+        correct += 1.0
+test_accuracy1 = correct / float(len(Y_test))
+print "test accuracy: ", test_accuracy1
+
+Y_pred = clf.predict(X_train)
+correct = 0.0
+for i in range(len(Y_train)):
+    if Y_train[i] == Y_pred[i]:
+        correct += 1.0
+train_accuracy1 = correct / float(len(Y_train))
+print "train accuracy: ", train_accuracy1
 
 
-"""Run svm
-"""
-
-lsvc = svm.LinearSVC(C=0.01, penalty="l1", dual=False).fit(X_train, Y_train)
-model = SelectFromModel(lsvc, prefit=True)
-X_new = model.transform(X_train)
-clf = svm.SVC(kernel='rbf')
-clf.fit(X_new, Y_train)
-train_pred = clf.predict(X_new)
-X_new = model.transform(X_test)
-test_pred = clf.predict(X_new)
-print "train accuracy: ", accurayc(train_pred, Y_train)
-print "test accuracy: ", accurayc(test_pred, Y_test)

@@ -158,6 +158,7 @@ model = SelectFromModel(lsvc, prefit=True)
 X_train = model.transform(X_train)
 X_test = model.transform(X_test)
 
+
 clf = MultinomialNB()
 clf.fit(X_train, Y_train)
 Y_pred = clf.predict(X_test)
