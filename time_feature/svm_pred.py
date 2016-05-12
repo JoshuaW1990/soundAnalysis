@@ -32,12 +32,24 @@ for i in range(1, len(sheet_names)):
         input_set.append(instance)
         output_set.append(i)
 
+# change the size of the feature set
+tmp_input = list(input_set)
+input_set = []
+size = len(tmp_input[0]) / 2
+for i in range(len(tmp_input)):
+    input_feature = []
+    for j in range(size):
+        feature_value = (float(tmp_input[i][2*j]) + float(tmp_input[i][2*j+1])) / 2.0
+        input_feature.append(feature_value)
+    input_set.append(input_feature)
+
 # Handling continuous value
 flatten_input = []
 for instance in input_set:
     flatten_input += instance
 max_value = max(flatten_input)
 min_value = min(flatten_input)
+
 gap = max_value - min_value
 gap_fold_num = 20
 gap_fold_size = float(gap) / float(gap_fold_num)
@@ -49,7 +61,17 @@ for instance in input_set:
         value = float(floor(float(tmp_value) / gap_fold_size))
         preprocess_instance.append(value)
     preprocess_input.append(preprocess_instance)
-
+"""
+gap = max_value - min_value
+preprocess_input = []
+for instance in input_set:
+    preprocess_instance = []
+    for value in instance:
+        tmp_value = value - min_value
+        value = tmp_value / gap
+        preprocess_instance.append(value)
+    preprocess_input.append(preprocess_instance)
+"""
 
 # Split the data for cross validation
 X_train, X_test, Y_train, Y_test = train_test_split(preprocess_input, output_set,
@@ -80,6 +102,7 @@ X_test = model.transform(X_test)
 # test accuracy = 37.93%
 # train accuracy = 62.93%
 """
+
 clf = svm.SVC(kernel='rbf')
 clf.fit(X_train, Y_train)
 train_pred = clf.predict(X_train)
@@ -89,6 +112,10 @@ print "test accuracy: ", accurayc(test_pred, Y_test)
 # test accuracy = 67.95%
 # train accuracy = 51.72%
 
+
+
+
+"""
 clf = MultinomialNB()
 clf.fit(X_train, Y_train)
 Y_pred = clf.predict(X_test)
@@ -110,3 +137,4 @@ print train_accuracy1
 
 # accuracy = 0.6770833333333334
 # preprocessed: 57.92%
+"""

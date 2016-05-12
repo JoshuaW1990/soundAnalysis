@@ -7,6 +7,7 @@ import matplotlib.pyplot as pl
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.datasets import SupervisedDataSet
 from pybrain.tools.shortcuts import buildNetwork
+from pybrain.structure.modules   import LSTMLayer, SoftmaxLayer
 
 
 xl_wb = xlrd.open_workbook("set01.xlsx")
@@ -119,7 +120,7 @@ ds = SupervisedDataSet(x_dimension, y_dimension)
 for i in range(len(X_train)):
     ds.addSample(X_train[i], Y_train[i])
 
-net = buildNetwork(x_dimension, x_dimension, y_dimension, bias=True)
+net = buildNetwork(x_dimension, x_dimension, y_dimension, hiddenclass=LSTMLayer, outclass=SoftmaxLayer, bias=True)
 
 trainer = BackpropTrainer(net, dataset = ds)
 trnerr,valerr = trainer.trainUntilConvergence(dataset=ds, maxEpochs=5000)
@@ -135,7 +136,7 @@ for i in range(len(Y_train)):
     if compare_list(Y_train[i], Y_pred[i]):
         correct += 1.0
 train_accuracy2 = correct / float(len(Y_train))
-print train_accuracy2
+print "training accuracy is ", train_accuracy2
 test_out = net.activateOnDataset(test_ds)
 Y_pred = convert_output(test_out)
 correct = 0.0
@@ -143,10 +144,11 @@ for i in range(len(Y_test)):
     if compare_list(Y_test[i], Y_pred[i]):
         correct += 1.0
 test_accuracy2 = correct / float(len(Y_test))
-print test_accuracy2
+print "test accuracy is ", test_accuracy2
 
 
 """
+not lstm
 epochs = 50
 In[69]: run ann.py
 0.150579150579
@@ -162,5 +164,14 @@ In[73]: run ann.py
 0.513513513514
 0.448275862069
 
+
+lstm
+epochs = 50
+training accuracy is  0.158301158301
+test accuracy is  0.206896551724
+
+epochs = 500
+training accuracy is  0.11583011583
+test accuracy is  0.172413793103
 
 """

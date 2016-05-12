@@ -31,6 +31,21 @@ for i in range(1, len(sheet_names)):
         input_set.append(instance)
         output_set.append(i)
 
+"""
+# change the size of the feature set
+tmp_input = list(input_set)
+input_set = []
+size = len(tmp_input[0]) / 2
+for i in range(len(tmp_input)):
+    input_feature = []
+    for j in range(size):
+        feature_value = (float(tmp_input[i][2*j]) + float(tmp_input[i][2*j+1])) / 2.0
+        input_feature.append(feature_value)
+    input_set.append(input_feature)
+41.38%
+42.09%
+"""
+
 # Handling continuous value
 flatten_input = []
 for instance in input_set:
@@ -170,6 +185,7 @@ test_accuracy1 = correct / float(len(Y_test))
 print test_accuracy1
 # raw: 37.9%
 # preprocessed: 58.62%
+
 Y_pred = clf.predict(X_train)
 correct = 0.0
 for i in range(len(Y_train)):
@@ -184,42 +200,5 @@ print train_accuracy1
 
 
 
-"""Neural Network
 
-x_dimension = len(X_train[0])
-y_dimension = 1
-ds = SupervisedDataSet(x_dimension, y_dimension)
-for i in range(len(X_train)):
-    ds.addSample(X_train[i], Y_train[i])
-
-net = buildNetwork(x_dimension, x_dimension, y_dimension, bias=True)
-
-trainer = BackpropTrainer(net, dataset = ds)
-trnerr,valerr = trainer.trainUntilConvergence(dataset=ds, maxEpochs=50)
-pl.plot(trnerr,'b',valerr,'r')
-
-test_ds = SupervisedDataSet(x_dimension, y_dimension)
-for i in range(len(X_test)):
-    test_ds.addSample(X_test[i], Y_test[i])
-train_out = net.activateOnDataset(ds)
-Y_pred = [int(item) for item in train_out]
-correct = 0.0
-for i in range(len(Y_train)):
-    if Y_train[i] == Y_pred[i]:
-        correct += 1.0
-train_accuracy2 = correct / float(len(Y_train))
-print train_accuracy2
-test_out = net.activateOnDataset(test_ds)
-Y_pred = [int(item) for item in test_out]
-correct = 0.0
-for i in range(len(Y_test)):
-    if Y_test[i] == Y_pred[i]:
-        correct += 1.0
-test_accuracy2 = correct / float(len(Y_test))
-print test_accuracy2
-"""
-
-
-"""svm
-"""
 
