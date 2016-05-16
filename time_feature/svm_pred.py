@@ -8,14 +8,14 @@ from math import ceil, floor
 
 """read data
 """
-xl_wb = xlrd.open_workbook("set01.xlsx")
+xl_wb = xlrd.open_workbook("set03.xlsx")
 
 # Read the data
 sheet_names = xl_wb.sheet_names()
 
 input_set = [] # list of data
 output_set = [] # 1 ~ 9
-for i in range(1, len(sheet_names)):
+for i in range(2, len(sheet_names)):
     sheet_name = sheet_names[i]
     xl_ws = xl_wb.sheet_by_name(sheet_name)
     for j in range(xl_ws.ncols):
@@ -30,8 +30,14 @@ for i in range(1, len(sheet_names)):
             value = cell.value
             instance.append(value)
         input_set.append(instance)
-        output_set.append(i)
+        if i >= 1 and i <= 6:
+            output_set.append(0)
+        elif i > 6 and i <= 9:
+            output_set.append(1)
+        else:
+            output_set.append(2)
 
+"""
 # change the size of the feature set
 tmp_input = list(input_set)
 input_set = []
@@ -42,6 +48,7 @@ for i in range(len(tmp_input)):
         feature_value = (float(tmp_input[i][2*j]) + float(tmp_input[i][2*j+1])) / 2.0
         input_feature.append(feature_value)
     input_set.append(input_feature)
+"""
 
 # Handling continuous value
 flatten_input = []
@@ -81,7 +88,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(preprocess_input, output_set
 """helper function
 """
 #accuracy
-def accurayc(pred_labels, labels):
+def accuracy(pred_labels, labels):
     correct = 0
     total = len(labels)
     for i in range(len(labels)):
@@ -94,47 +101,15 @@ def accurayc(pred_labels, labels):
 
 """Run svm
 """
-"""
-lsvc = svm.LinearSVC(C=0.01, penalty="l1", dual=False).fit(X_train, Y_train)
-model = SelectFromModel(lsvc, prefit=True)
-X_train = model.transform(X_train)
-X_test = model.transform(X_test)
-# test accuracy = 37.93%
-# train accuracy = 62.93%
-"""
-
 clf = svm.SVC(kernel='rbf')
 clf.fit(X_train, Y_train)
 train_pred = clf.predict(X_train)
 test_pred = clf.predict(X_test)
-print "train accuracy: ", accurayc(train_pred, Y_train)
-print "test accuracy: ", accurayc(test_pred, Y_test)
+print "train accuracy: ", accuracy(train_pred, Y_train)
+print "test accuracy: ", accuracy(test_pred, Y_test)
 # test accuracy = 67.95%
 # train accuracy = 51.72%
 
 
 
 
-"""
-clf = MultinomialNB()
-clf.fit(X_train, Y_train)
-Y_pred = clf.predict(X_test)
-correct = 0.0
-for i in range(len(Y_test)):
-    if Y_test[i] == Y_pred[i]:
-        correct += 1.0
-test_accuracy1 = correct / float(len(Y_test))
-print test_accuracy1
-# raw: 37.9%
-# preprocessed: 58.62%
-Y_pred = clf.predict(X_train)
-correct = 0.0
-for i in range(len(Y_train)):
-    if Y_train[i] == Y_pred[i]:
-        correct += 1.0
-train_accuracy1 = correct / float(len(Y_train))
-print train_accuracy1
-
-# accuracy = 0.6770833333333334
-# preprocessed: 57.92%
-"""

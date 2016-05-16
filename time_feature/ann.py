@@ -1,3 +1,6 @@
+from pylab import plot, hold, show
+from scipy import sin, rand, arange
+
 import numpy as np
 import tensorflow as tf
 from sklearn.cross_validation import train_test_split
@@ -7,10 +10,15 @@ import matplotlib.pyplot as pl
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.datasets import SupervisedDataSet
 from pybrain.tools.shortcuts import buildNetwork
+
+from pybrain.datasets            import SequenceClassificationDataSet
 from pybrain.structure.modules   import LSTMLayer, SoftmaxLayer
+from pybrain.supervised          import RPropMinusTrainer
+from pybrain.tools.validation    import testOnSequenceData
+from pybrain.tools.shortcuts     import buildNetwork
 
 
-xl_wb = xlrd.open_workbook("set01.xlsx")
+xl_wb = xlrd.open_workbook("set02.xlsx")
 
 # Read the data
 sheet_names = xl_wb.sheet_names()
@@ -32,8 +40,13 @@ for i in range(1, len(sheet_names)):
             value = cell.value
             instance.append(value)
         input_set.append(instance)
-        tag = [0. for idx in range(len(sheet_names) - 1)]
-        tag[i - 1] = 1.0
+        tag = [0. for idx in range(3)]
+        if i >= 1 and i <= 6:
+            tag[0] = 1.0
+        elif i > 6 and i <= 9:
+            tag[1] = 1.0
+        else:
+            tag[2] = 1.0
         output_set.append(tag)
 
 # Normalization
@@ -62,7 +75,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(preprocess_input, output_set
                                                     random_state=0)
 
 """simple model
-
+# tensorflow
 x = tf.placeholder("float", [None, 200])
 W = tf.Variable(tf.zeros([200, 10]))
 b = tf.Variable(tf.zeros([10]))
@@ -113,17 +126,18 @@ def compare_list(list1, list2):
 
 
 
-
+"""
+# Non recurrent
 x_dimension = len(X_train[0])
 y_dimension = len(Y_train[0])
 ds = SupervisedDataSet(x_dimension, y_dimension)
 for i in range(len(X_train)):
     ds.addSample(X_train[i], Y_train[i])
 
-net = buildNetwork(x_dimension, x_dimension, y_dimension, hiddenclass=LSTMLayer, outclass=SoftmaxLayer, bias=True)
+net = buildNetwork(x_dimension, x_dimension, y_dimension, bias = True)
 
 trainer = BackpropTrainer(net, dataset = ds)
-trnerr,valerr = trainer.trainUntilConvergence(dataset=ds, maxEpochs=5000)
+trnerr,valerr = trainer.trainUntilConvergence(dataset=ds, maxEpochs=50)
 pl.plot(trnerr,'b',valerr,'r')
 
 test_ds = SupervisedDataSet(x_dimension, y_dimension)
@@ -145,33 +159,30 @@ for i in range(len(Y_test)):
         correct += 1.0
 test_accuracy2 = correct / float(len(Y_test))
 print "test accuracy is ", test_accuracy2
-
-
 """
-not lstm
-epochs = 50
-In[69]: run ann.py
-0.150579150579
-0.241379310345
 
-epochs = 500
-In[71]: run ann.py
-0.420849420849
-0.413793103448
+x_dimension = len(X_train[0])
+y_dimension = len(Y_train[0])
+ds = SupervisedDataSet(x_dimension, y_dimension)
+for i in range(len(X_train)):
+    ds.addSample(X_train[i], Y_train[i])
+# construct LSTM network - note the missing output bias
+rnn = buildNetwork(x_dimension, x_dimension, y_dimension, hiddenclass=LSTMLayer, outclass=SoftmaxLayer, outputbias=False, recurrent=True)
 
-epochs = 5000
-In[73]: run ann.py
-0.513513513514
-0.448275862069
+# define a training method
+trainer = RPropMinusTrainer( rnn, dataset=ds, verbose=True )
+# instead, you may also try
+##trainer = BackpropTrainer( rnn, dataset=trndata, verbose=True, momentum=0.9, learningrate=0.00001 )
 
+# carry out the training
+for i in range(100):
+    trainer.trainEpochs(2)
+    trnresult = 100. * (1.0-testOnSequenceData(rnn, ds))
+    tstresult = 100. * (1.0-testOnSequenceData(rnn, ds))
+    print("train error: %5.2f%%" % trnresult, ",  test error: %5.2f%%" % tstresult)
 
-lstm
-epochs = 50
-training accuracy is  0.158301158301
-test accuracy is  0.206896551724
-
-epochs = 500
-training accuracy is  0.11583011583
-test accuracy is  0.172413793103
-
-"""
+# just for reference, plot the first 5 timeseries
+plot(ds['input'][0:250,:],'-o')
+hold(True)
+plot(ds['target'][0:250,0])
+show()

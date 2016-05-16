@@ -7,7 +7,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 
 
-xl_wb = xlrd.open_workbook("set01.xlsx")
+xl_wb = xlrd.open_workbook("set02.xlsx")
 
 # Read the data
 sheet_names = xl_wb.sheet_names()
