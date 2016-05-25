@@ -2,7 +2,7 @@ from pylab import plot, hold, show
 from scipy import sin, rand, arange
 
 import numpy as np
-import tensorflow as tf
+#import tensorflow as tf
 from sklearn.cross_validation import train_test_split
 import xlrd
 from math import floor, ceil, log, exp

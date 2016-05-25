@@ -4,7 +4,9 @@
 
 Classify the type of the sound according to the signals.
 
+## Working list
+* cross validation
+svm, set02.xlsx
 
 ## TODO list
-[ ] cross validation
 [ ] time series classification
